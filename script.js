@@ -11,10 +11,10 @@ let foodEatean;
 let speed;
 let isSpecialFood;
 
-const snake = document.querySelector(".game_snake");
 const game_container = document.querySelector(".game_box");
 const score_count = document.querySelector("#score_count");
 let food;
+let snake;
 
 let snakeMoveInterval;
 let snakeDirection = null;
@@ -23,15 +23,12 @@ let foodCoordinates = {
   left: null,
 };
 
-snake.style.top = 0;
-snake.style.left = 0;
-
 window.addEventListener("keydown", (event) => {
   if (isDirectionAllowed(snakeDirection, event.key)) {
     snakeDirection = event.key;
     clearInterval(snakeMoveInterval);
     snakeMoveInterval = setInterval(() => {
-      moveSnake(event.key);
+      moveFirstSnake(event.key);
     }, SNAKE_SPEED / speed);
   }
 });
@@ -70,9 +67,9 @@ function willCollide(newTop, newLeft) {
   return false;
 }
 
-function moveSnake(arrowDirection) {
-  let newTop = parseFloat(snake.style.top);
-  let newLeft = parseFloat(snake.style.left);
+function moveFirstSnake(arrowDirection) {
+  let newTop = parseFloat(snake[0].style.top);
+  let newLeft = parseFloat(snake[0].style.left);
   switch (arrowDirection) {
     case "ArrowUp":
       newTop -= 0.625;
@@ -93,8 +90,16 @@ function moveSnake(arrowDirection) {
     startSnakeGame();
   } else {
     snakeReachedFood();
-    snake.style.top = `${newTop}rem`;
-    snake.style.left = `${newLeft}rem`;
+    moveAllSnakes();
+    snake[0].style.top = `${newTop}rem`;
+    snake[0].style.left = `${newLeft}rem`;
+  }
+}
+
+function moveAllSnakes() {
+  for (let i = snake.length - 1; i > 0; i--) {
+    snake[i].style.top = snake[i - 1].style.top;
+    snake[i].style.left = snake[i - 1].style.left;
   }
 }
 
@@ -111,9 +116,15 @@ function isDirectionAllowed(prevDirection, newDirection) {
 }
 
 function startSnakeGame() {
-  snake.style.top = `0rem`;
-  snake.style.left = `0rem`;
-  snake.style.transition = "top 100ms linear, left 100ms linear";
+  if (snake) {
+    for (let box of snake) {
+      game_container.removeChild(box);
+    }
+  }
+  snake = [makeSnakeBox()];
+  snake[0].style.top = `0rem`;
+  snake[0].style.left = `0rem`;
+  snake[0].style.transition = "top 100ms linear, left 100ms linear";
   snakeDirection = null;
   score = 0;
   score_count.innerText = score;
@@ -126,19 +137,22 @@ function startSnakeGame() {
 
 function snakeReachedFood() {
   if (
-    Math.abs(parseFloat(snake.style.top) - parseFloat(food.style.top)) <=
+    Math.abs(parseFloat(snake[0].style.top) - parseFloat(food.style.top)) <=
       1.25 * FOOD_RADIUS &&
-    Math.abs(parseFloat(snake.style.left) - parseFloat(food.style.left)) <=
+    Math.abs(parseFloat(snake[0].style.left) - parseFloat(food.style.left)) <=
       1.25 * FOOD_RADIUS
   ) {
     foodEatean++;
     score += isSpecialFood ? 10 : 1;
     speed += isSpecialFood ? 0.2 : 0.1;
     const newSpeed = SNAKE_SPEED / speed;
-    snake.style.transition = `top ${newSpeed}ms linear, left ${newSpeed}ms linear`;
 
     score_count.innerText = score;
     createSnakeFood();
+    snake = [...snake, makeSnakeBox()];
+    snake.forEach((box) => {
+      box.style.transition = `top ${newSpeed}ms linear, left ${newSpeed}ms linear`;
+    });
     return true;
   }
   return false;
@@ -150,4 +164,10 @@ function getRandomPosition() {
   return [randomTop, randomLeft];
 }
 
+function makeSnakeBox() {
+  const newDiv = document.createElement("div");
+  newDiv.classList.add("game_snake_box");
+  game_container.appendChild(newDiv);
+  return newDiv;
+}
 startSnakeGame();

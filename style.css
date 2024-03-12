@@ -32,7 +32,7 @@
   position: relative;
 }
 
-.game_snake {
+.game_snake_box {
   width: 1.5rem;
   height: 1.5rem;
   background-color: #fff;

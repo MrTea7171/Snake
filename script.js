@@ -18,10 +18,6 @@ let snake;
 
 let snakeMoveInterval;
 let snakeDirection = null;
-let foodCoordinates = {
-  top: null,
-  left: null,
-};
 
 window.addEventListener("keydown", (event) => {
   if (isDirectionAllowed(snakeDirection, event.key)) {
@@ -73,15 +69,27 @@ function moveFirstSnake(arrowDirection) {
   switch (arrowDirection) {
     case "ArrowUp":
       newTop -= 0.625;
+      if (newTop < TOP_START) {
+        newTop = TOP_END;
+      }
       break;
     case "ArrowDown":
       newTop += 0.625;
+      if (newTop > TOP_END) {
+        newTop = TOP_START;
+      }
       break;
     case "ArrowLeft":
       newLeft -= 0.625;
+      if (newLeft < LEFT_START) {
+        newLeft = LEFT_END;
+      }
       break;
     case "ArrowRight":
       newLeft += 0.625;
+      if (newLeft > LEFT_END) {
+        newLeft = LEFT_START;
+      }
       break;
   }
 
